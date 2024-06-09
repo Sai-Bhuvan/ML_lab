@@ -1,0 +1,72 @@
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef, roc_curve, auc
+import matplotlib.pyplot as plt
+
+# Generate synthetic dataset
+X, y = make_classification(n_samples=1000, n_features=10, n_informative=5, n_classes=2, random_state=42)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Example predictions 
+y_pred = np.random.randint(2, size=len(y_test))
+
+# Calculate confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+tp = cm[1, 1]
+tn = cm[0, 0]
+fp = cm[0, 1]
+fn = cm[1, 0]
+
+# Calculate metrics
+accuracy = (tp + tn) / (tp + tn + fp + fn)
+precision = tp / (tp + fp) if (tp + fp) != 0 else 0
+recall = tp / (tp + fn) if (tp + fn) != 0 else 0
+f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) != 0 else 0
+specificity = tn / (tn + fp) if (tn + fp) != 0 else 0
+npv = tn / (tn + fn) if (tn + fn) != 0 else 0
+mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) != 0 else 0
+
+# Print metrics
+print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
+print(f"Accuracy: {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall (Sensitivity): {recall:.4f}")
+print(f"F1-Score: {f1:.4f}")
+print(f"Specificity: {specificity:.4f}")
+print(f"Negative Predictive Value: {npv:.4f}")
+print(f"MCC: {mcc:.4f}")
+
+# Calculate metrics using scikit-learn
+accuracy_sklearn = accuracy_score(y_test, y_pred)
+precision_sklearn = precision_score(y_test, y_pred)
+recall_sklearn = recall_score(y_test, y_pred)
+f1_score_sklearn = f1_score(y_test, y_pred)
+mcc_sklearn = matthews_corrcoef(y_test, y_pred)
+
+print(f"Accuracy (scikit-learn): {accuracy_sklearn:.4f}")
+print(f"Precision (scikit-learn): {precision_sklearn:.4f}")
+print(f"Recall (Sensitivity) (scikit-learn): {recall_sklearn:.4f}")
+print(f"F1-Score (scikit-learn): {f1_score_sklearn:.4f}")
+print(f"MCC (scikit-learn): {mcc_sklearn:.4f}")
+
+# Calculate Confusion Matrix using scikit-learn
+cm_sklearn = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix (scikit-learn):\n", cm_sklearn)
+
+# Calculate ROC curve and AUC using scikit-learn
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+auc_score = auc(fpr, tpr)
+print(f"AUC: {auc_score:.4f}")
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, color='blue', lw=2, label=f'AUC = {auc_score:.4f}')
+# plt.plot([0, 1], [0, 1], color='gray', linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve')
+plt.legend()
+plt.show()
