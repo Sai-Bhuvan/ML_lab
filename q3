@@ -1,0 +1,46 @@
+import numpy as np
+import pandas as pd 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score
+from sklearn.datasets import load_digits
+import matplotlib.pyplot as plt
+
+data=load_digits()
+X=data.data
+y=data.target
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+
+ans={'acc':[],'pre':[],'rec':[],'f1':[]}
+no_tress=[1,5,10,15,20]
+
+def randa(no_tree):
+  f=RandomForestClassifier(n_estimators=no_tree,random_state=42)
+  f.fit(X_train,y_train)
+  y_pred=f.predict(X_test)
+
+  acc=accuracy_score(y_test,y_pred)
+  pre=precision_score(y_test,y_pred,average='weighted')
+  rec=recall_score(y_test,y_pred,average='weighted')
+  f1=f1_score(y_test,y_pred,average='weighted')
+
+  return acc,pre,rec,f1
+
+
+for i in no_tress:
+  acc,pre,rec,f1=randa(i)
+  ans['acc'].append(acc)
+  ans['pre'].append(pre)
+  ans['rec'].append(rec)
+  ans['f1'].append(f1)
+
+plt.figure(figsize=(10,10))
+plt.plot(no_tress,ans['acc'],label='accuracy')
+plt.plot(no_tress,ans['pre'],label='precision')
+plt.plot(no_tress,ans['rec'],label='recall')
+plt.plot(no_tress,ans['f1'],label='f1')
+plt.xlabel('no of tress')
+plt.ylabel('score')
+plt.legend()
+plt.show()
