@@ -1,0 +1,33 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.datasets import load_iris
+
+irir=load_iris()
+X=iris.data
+y=iris.target
+
+df=pd.DataFrame(X,columns=iris.feature_names)
+df['target']=y
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+df0=df[:50]
+df1=df[50:100]
+df2=df[100:]
+
+import matplotlib.pyplot as plt
+plt.scatter(df0['sepal length (cm)'],df0['sepal width (cm)'],color='red',marker='*')
+plt.scatter(df1['sepal length (cm)'],df1['sepal width (cm)'],color='blue',marker='+')
+
+model=KNeighborsClassifier(n_neighbors=4)
+model.fit(X_train,y_train)
+model.score(X_test,y_test)
+y_pred=model.predict(X_test)
+y_pred
+
+plt.scatter(df0['petal length (cm)'],df0['petal width (cm)'],color='green',marker='*')
+plt.scatter(df1['petal length (cm)'],df1['petal width (cm)'],color='blue',marker='+')
