@@ -1,0 +1,38 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import mean_squared_error, r2_score,classification_report
+
+np.random.seed(42)
+no_samples=1000
+class1=[1,2]
+cov1=[[1,0.5],[0.5,1]]
+class2=[4,5]
+cov2=[[1,-0.5],[-0.5,1]]
+
+class1data=np.random.multivariate_normal(class1,cov1,no_samples//2)
+class2data=np.random.multivariate_normal(class2,cov2,no_samples//2)
+
+X=np.concatenate((class1data,class2data),axis=0)
+y=np.concatenate(([0]*np.zeros(no_samples//2),[1]*np.ones(no_samples//2)),axis=0) 
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+model=GaussianNB()
+model.fit(X_train,y_train)
+
+y_pred=model.predict(X_test)
+
+acc=accuracy_score(y_test,y_pred)
+pre=precision_score(y_test,y_pred)
+rec=recall_score(y_test,y_pred)
+f1=f1_score(y_test,y_pred)
+
+# print(f"accuracy : {acc}")
+# print(f"precision : {pre}")
+# print(f"recall : {rec}")
+# print(f"f1 : {f1}")
+
+print(classification_report(y_test,y_pred))
