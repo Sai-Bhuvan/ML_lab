@@ -1,33 +1,44 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import mean_squared_error,r2_score
-from sklearn.datasets import load_iris
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import accuracy_score
 
-irir=load_iris()
-X=iris.data
-y=iris.target
+# Load and preprocess data
+df = pd.read_csv('diabetes.csv')
+df.fillna(df.mean(), inplace=True)  # Replace missing values with mean
 
-df=pd.DataFrame(X,columns=iris.feature_names)
-df['target']=y
+# Normalize data
+scaler = MinMaxScaler()
+features = ['Glucose', 'BloodPressure', 'Insulin', 'BMI', 'Age']  # example features
+df[features] = scaler.fit_transform(df[features])
 
-X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+# Split dataset
+X = df[features]
+y = df['Outcome']  # Assuming 'Outcome' is the target variable
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-df0=df[:50]
-df1=df[50:100]
-df2=df[100:]
+# Define Euclidean distance function
+def euclidean_distance(row1, row2):
+    return np.sqrt(np.sum((row1 - row2) ** 2))
 
-import matplotlib.pyplot as plt
-plt.scatter(df0['sepal length (cm)'],df0['sepal width (cm)'],color='red',marker='*')
-plt.scatter(df1['sepal length (cm)'],df1['sepal width (cm)'],color='blue',marker='+')
+# Get K nearest neighbors
+def get_neighbors(X_train, y_train, test_row, num_neighbors):
+    distances = []
+    for i in range(len(X_train)):
+        dist = euclidean_distance(test_row, X_train.iloc[i])
+        distances.append((y_train.iloc[i], dist))
+    distances.sort(key=lambda x: x[1])
+    neighbors = [distances[i][0] for i in range(num_neighbors)]
+    return neighbors
 
-model=KNeighborsClassifier(n_neighbors=4)
-model.fit(X_train,y_train)
-model.score(X_test,y_test)
-y_pred=model.predict(X_test)
-y_pred
+# Predict the class
+def predict_classification(X_train, y_train, test_row, num_neighbors):
+    neighbors = get_neighbors(X_train, y_train, test_row, num_neighbors)
+    prediction = max(set(neighbors), key=neighbors.count)
+    return prediction
 
-plt.scatter(df0['petal length (cm)'],df0['petal width (cm)'],color='green',marker='*')
-plt.scatter(df1['petal length (cm)'],df1['petal width (cm)'],color='blue',marker='+')
+# Test the KNN model
+y_pred = [predict_classification(X_train, y_train, row, num_neighbors=5) for index, row in X_test.iterrows()]
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy of the KNN model:", accuracy)
